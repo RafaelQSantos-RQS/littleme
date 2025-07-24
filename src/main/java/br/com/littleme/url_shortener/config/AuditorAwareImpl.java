@@ -1,18 +1,23 @@
 package br.com.littleme.url_shortener.config;
 
 import org.springframework.data.domain.AuditorAware;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
 
 public class AuditorAwareImpl implements AuditorAware<String> {
     /**
-     * Retrieves the current auditor based on Spring Security context information.
-     * Will return <code>SYSTEM</code> if no auditor is set.
-     *
-     * @return an {@link Optional} {@link String} auditor.
+     * @return the username of the currently authenticated user, or "SYSTEM" if unauthenticated.
      */
     @Override
     public Optional<String> getCurrentAuditor() {
-        return Optional.of("SYSTEM");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+            return Optional.of("SYSTEM");
+        }
+
+        return Optional.of(authentication.getName());
     }
 }
