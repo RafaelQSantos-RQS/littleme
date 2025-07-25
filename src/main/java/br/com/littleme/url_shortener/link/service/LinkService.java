@@ -1,6 +1,7 @@
 package br.com.littleme.url_shortener.link.service;
 
 import br.com.littleme.url_shortener.common.dto.PageResponse;
+import br.com.littleme.url_shortener.common.exception.ForbiddenActionException;
 import br.com.littleme.url_shortener.common.exception.LinkNotFoundException;
 import br.com.littleme.url_shortener.link.domain.Link;
 import br.com.littleme.url_shortener.link.dto.LinkCreateRequest;
@@ -8,12 +9,16 @@ import br.com.littleme.url_shortener.link.dto.LinkResponse;
 import br.com.littleme.url_shortener.link.dto.LinkUpdateRequest;
 import br.com.littleme.url_shortener.link.mapper.LinkMapper;
 import br.com.littleme.url_shortener.link.repository.LinkRepository;
+import br.com.littleme.url_shortener.user.domain.Role;
+import br.com.littleme.url_shortener.user.domain.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,6 +37,8 @@ public class LinkService {
      * @return the response with the shortened URL
      */
     public LinkResponse create(LinkCreateRequest request) {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         Link link = linkMapper.toLink(request);
 
         String randomCode = UUID.randomUUID().toString().substring(0, 8);
@@ -120,11 +127,38 @@ public class LinkService {
      */
     @Transactional
     public void deleteById(UUID id) {
-        if (!this.linkRepository.existsById(id)) {
-            throw new LinkNotFoundException("Link com o ID '" + id + "' não encontrado para exclusão.");
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Link linkToDelete = linkRepository.findById(id)
+                .orElseThrow(() -> new LinkNotFoundException("Link com o ID '" + id + "' não encontrado para exclusão."));
+
+        boolean isAdmin = currentUser.getRole() == Role.ROLE_ADMIN;
+        boolean isOwner = linkToDelete.getCreatedBy().getId().equals(currentUser.getId());
+
+        if (!isAdmin && !isOwner) {
+            throw new ForbiddenActionException("User does not have permission to delete this link.");
         }
 
-        this.linkRepository.deleteById(id);
+        linkToDelete.setDeletedAt(OffsetDateTime.now());
+        linkToDelete.setDeletedBy(currentUser);
+
+        linkRepository.save(linkToDelete);
+    }
+
+    public PageResponse<LinkResponse> findMyLinks(User currentUser, Pageable pageable) {
+        Page<Link> linkPage = linkRepository.findAllByCreatedBy(currentUser, pageable);
+
+        List<LinkResponse> linkResponses = linkPage.getContent().stream()
+                .map(linkMapper::toResponse)
+                .toList();
+
+        return new PageResponse<>(
+                linkResponses,
+                linkPage.getNumber() + 1,
+                linkPage.getSize(),
+                linkPage.getTotalElements(),
+                linkPage.getTotalPages()
+        );
     }
 
 }

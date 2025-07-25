@@ -1,9 +1,7 @@
 package br.com.littleme.url_shortener.common.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.MappedSuperclass;
+import br.com.littleme.url_shortener.user.domain.User;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedBy;
@@ -28,10 +26,19 @@ public class Auditable {
     protected OffsetDateTime updatedAt;
 
     @CreatedBy
-    @Column(name = "created_by", nullable = false, updatable = false)
-    protected String createdBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", nullable = false, updatable = false)
+    protected User createdBy;
 
     @LastModifiedBy
-    @Column(name = "updated_by", nullable = false)
-    protected String updatedBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "updated_by", nullable = false)
+    protected User updatedBy;
+
+    @Column(name = "deleted_at")
+    protected OffsetDateTime deletedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deleted_by")
+    protected User deletedBy;
 }

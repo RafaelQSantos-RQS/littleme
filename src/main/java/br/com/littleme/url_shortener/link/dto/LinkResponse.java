@@ -9,6 +9,8 @@ public record LinkResponse(
         String fullUrl,
         String code,
         String description,
-        OffsetDateTime createdAt
+        OffsetDateTime createdAt,
+        String createdBy,
+        String updatedBy
 ) {
 }

@@ -5,6 +5,7 @@ import br.com.littleme.url_shortener.link.dto.LinkCreateRequest;
 import br.com.littleme.url_shortener.link.dto.LinkResponse;
 import br.com.littleme.url_shortener.link.dto.LinkUpdateRequest;
 import br.com.littleme.url_shortener.link.service.LinkService;
+import br.com.littleme.url_shortener.user.domain.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -56,5 +58,14 @@ public class LinkController {
     public ResponseEntity<Void> deleteById(@PathVariable UUID id) {
         this.linkService.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<PageResponse<LinkResponse>> findMyLinks(
+            @AuthenticationPrincipal User currentUser,
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        var response = linkService.findMyLinks(currentUser, pageable);
+        return ResponseEntity.ok(response);
     }
 }

@@ -1,5 +1,6 @@
 package br.com.littleme.url_shortener.config;
 
+import br.com.littleme.url_shortener.user.domain.User;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.auditing.DateTimeProvider;
@@ -17,7 +18,7 @@ public class JpaAuditingConfig {
      * @return A bean that provides the current user identifier.
      */
     @Bean
-    public AuditorAware<String> auditorAware() {
+    public AuditorAware<User> auditorAware() {
         return new AuditorAwareImpl();
     }
 

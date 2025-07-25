@@ -44,6 +44,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
                         .requestMatchers(HttpMethod.GET, "/{code:[a-zA-Z0-9]{8}}").permitAll()
+
+                        .requestMatchers("/users/me").authenticated()
+                        .requestMatchers("/links/me").authenticated()
+
+                        .requestMatchers("/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/links").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
