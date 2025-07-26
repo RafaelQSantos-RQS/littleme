@@ -5,6 +5,11 @@ import br.com.littleme.url_shortener.user.domain.User;
 import br.com.littleme.url_shortener.user.dto.*;
 import br.com.littleme.url_shortener.user.mapper.UserMapper;
 import br.com.littleme.url_shortener.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -20,12 +25,15 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
+@Tag(name = "User Management", description = "Endpoints for user management")
 public class UserController {
 
     private final UserService userService;
     private final UserMapper userMapper;
 
     @PostMapping
+    @Operation(security = {})
     public ResponseEntity<UserResponse> create(@RequestBody UserCreateRequest request) {
         UserResponse response = userService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -40,6 +48,12 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Find a User by ID", description = "Returns the details of a specific user based on its UUID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User found successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "403", description = "Access denied (user is not an admin or owner)")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<AdminUserResponse> findById(@PathVariable UUID id) {
         var response = userService.findById(id);

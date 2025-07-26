@@ -2,6 +2,7 @@ package br.com.littleme.url_shortener.link.web;
 
 import br.com.littleme.url_shortener.link.domain.Link;
 import br.com.littleme.url_shortener.link.service.LinkService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,8 @@ public class RedirectController {
 
     private final LinkService linkService;
 
-    @GetMapping("/{code}")
+    @GetMapping("/{code:[a-zA-Z0-9]{8}}")
+    @Operation(security = {})
     public ResponseEntity<Void> redirect(@PathVariable String code) {
 
         Link link = linkService.findByCode(code);

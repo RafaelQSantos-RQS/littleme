@@ -6,9 +6,9 @@ import br.com.littleme.url_shortener.link.dto.LinkResponse;
 import br.com.littleme.url_shortener.link.dto.LinkUpdateRequest;
 import br.com.littleme.url_shortener.link.service.LinkService;
 import br.com.littleme.url_shortener.user.domain.User;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -17,12 +17,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/links")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class LinkController {
 
     private final LinkService linkService;

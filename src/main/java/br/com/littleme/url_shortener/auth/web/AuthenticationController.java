@@ -3,6 +3,7 @@ package br.com.littleme.url_shortener.auth.web;
 import br.com.littleme.url_shortener.auth.dto.LoginRequest;
 import br.com.littleme.url_shortener.auth.dto.LoginResponse;
 import br.com.littleme.url_shortener.auth.service.TokenService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ public class AuthenticationController {
     private final TokenService tokenService;
 
     @PostMapping("/login")
+    @Operation(security = {})
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(request.email(), request.password());
 
