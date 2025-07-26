@@ -1,4 +1,25 @@
 services:
+  api:
+    build: .
+    container_name: url-shortener-api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - ADMIN_USER_EMAIL=${ADMIN_USER_EMAIL}
+      - ADMIN_USER_PASSWORD=${ADMIN_USER_PASSWORD}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
   postgres:
     image: postgres:15-alpine
     container_name: url-shortener-db
